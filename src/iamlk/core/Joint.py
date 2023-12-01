@@ -1,7 +1,7 @@
 from functools import cached_property
 
 import numpy as np
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge as RegressionAlgorithm
 from utils import Log
 
 log = Log('Joint')
@@ -15,7 +15,10 @@ class Joint:
 
     @staticmethod
     def lr_coefs(X, y, w):
-        lr = LinearRegression(fit_intercept=False, positive=True)
+        print(X[0], y[0], w[0])
+        lr = RegressionAlgorithm(
+            fit_intercept=False, positive=True, alpha=0.001
+        )
         lr.fit(X, y, w)
         return lr.coef_
 

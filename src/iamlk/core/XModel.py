@@ -1,13 +1,13 @@
 from functools import cached_property
 
 from gig import Ent, EntType, GIGTable
-from sklearn.linear_model import Ridge
 from utils import Log
 
 from iamlk.core.Joint import Joint
 
 log = Log('XModel')
 
+ENT_TYPE = EntType.GND
 K_MAP = {
     # population-ethnicity
     'sl_tamil': 'tamil',
@@ -75,7 +75,10 @@ class XModel:
             z_keys_list = []
             for z_gt in z_gt_list:
                 gt_row = country.gig(z_gt)
-                z_keys_list.append(list(XModel.remap(gt_row.dict).keys()))
+                d = XModel.remap(gt_row.dict)
+                total = sum(d.values())
+                log.debug(f'{total=}')
+                z_keys_list.append(list(d.keys()))
             return z_keys_list
 
         return get_z_keys_list(self.x_gt_list), get_z_keys_list(
@@ -86,7 +89,7 @@ class XModel:
     def data(self):
         x_keys_list, y_keys_list = self.keys
 
-        gnd_list = Ent.list_from_type(EntType.PROVINCE)
+        gnd_list = Ent.list_from_type(ENT_TYPE)
         x_list, y_list, w_list = [], [], []
         for i_gnd, gnd in enumerate(gnd_list):
             population = gnd.population
@@ -122,7 +125,7 @@ class XModel:
         return x_list, y_list, w_list
 
     @cached_property
-    def joint(self) -> Ridge:
+    def joint(self):
         x_list, y_list, w_list = self.data
         j = Joint(x_list, y_list, w_list)
         return j.joint
